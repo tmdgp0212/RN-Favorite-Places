@@ -9,7 +9,7 @@ interface Props {
 const PlaceItem = ({ place, onPress }: Props) => {
   return (
     <Pressable onPress={onPress}>
-      <Image source={{ uri: require(place.imageUri) }} />
+      <Image source={{ uri: place.imageUri }} />
       <View>
         <Text>{place.title}</Text>
         <Text>{place.address}</Text>
