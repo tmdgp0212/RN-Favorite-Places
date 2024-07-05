@@ -1,19 +1,22 @@
-import React from "react";
-import { Alert, Button, View } from "react-native";
+import React, { useState } from "react";
+import { Alert, Button, Image, StyleSheet, Text, View } from "react-native";
 import {
   launchCameraAsync,
   useCameraPermissions,
   PermissionStatus,
+  ImagePickerResult,
 } from "expo-image-picker";
+import { Colors } from "../../constants/colors";
 
 const ImagePicker = () => {
-  const [cameraPermissionInfo, requestPermisson] = useCameraPermissions();
+  const [cameraPermissionInfo, requestPermission] = useCameraPermissions();
+  const [imageUri, setImageUri] = useState<string>();
 
   // 카메라 권한 요청 (IOS 호환 시 필요 / android는 자동으로 이루어짐)
   const verifyPermissions = async () => {
     if (cameraPermissionInfo?.status === PermissionStatus.UNDETERMINED) {
       // 아직 권한 요청을 받은 적이 없음
-      const permissionRes = await requestPermisson();
+      const permissionRes = await requestPermission();
       return permissionRes.granted; // boolean
     }
 
@@ -40,22 +43,43 @@ const ImagePicker = () => {
       quality: 0.5, // 0 ~ 1
     });
 
-    /**
-     * 이미지 객체
-     * cancelled: boolean // 사진 선택 취소 여부
-     * height: number
-     * width: number
-     * type: 'image' || ... //
-     * uri: string // 이미지가 저장 된 실제 경로
-     */
+    !image.canceled && setImageUri(image.assets[0].uri || undefined);
   };
 
   return (
     <View>
-      <View></View>
+      <Text style={styles.subtitle}>사진선택</Text>
+      <View style={styles.imagePreview}>
+        {imageUri ? (
+          <Image source={{ uri: imageUri }} style={styles.image} />
+        ) : (
+          <Text style={styles.subtitle}>No Image.</Text>
+        )}
+      </View>
       <Button title="take image" onPress={takeImageHandler} />
     </View>
   );
 };
 
 export default ImagePicker;
+
+const styles = StyleSheet.create({
+  imagePreview: {
+    width: "100%",
+    height: 200,
+    marginVertical: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.primary800,
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
+  subtitle: {
+    marginTop: 8,
+    color: Colors.primary100,
+  },
+});
