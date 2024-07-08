@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { Alert, Button, Image, StyleSheet, Text, View } from "react-native";
 import {
   PermissionStatus,
@@ -7,11 +7,12 @@ import {
 } from "expo-location";
 import { Colors } from "../../constants/colors";
 import { getStaticMapPreview } from "../../utils/location";
-import { useNavigation } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParams } from "../../types/stackParams";
 
 const LocationPicker = () => {
+  const route = useRoute<RouteProp<RootStackParams, "AddPlace">>();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParams>>();
 
@@ -39,12 +40,18 @@ const LocationPicker = () => {
     return true;
   };
 
-  const getLocationHandler = async () => {
+  const getCurrentUserPosition = async () => {
     const hasPermission = await verifyPermissions();
 
     if (!hasPermission) return;
 
-    const location = await getCurrentPositionAsync({});
+    return await getCurrentPositionAsync({});
+  };
+
+  const getLocationHandler = async () => {
+    const location = await getCurrentUserPosition();
+
+    if (!location) return;
 
     const staticMapUri = getStaticMapPreview({
       lat: location.coords.latitude,
@@ -54,9 +61,31 @@ const LocationPicker = () => {
     setUserLocationMapUri(staticMapUri);
   };
 
-  const pickOnMapHandler = () => {
-    navigation.navigate("Map");
+  const pickOnMapHandler = async () => {
+    const location = await getCurrentUserPosition();
+
+    if (!location) return;
+
+    navigation.navigate("Map", {
+      coordinate: {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      },
+    });
   };
+
+  useLayoutEffect(() => {
+    if (route.params?.pickedLocation) {
+      const { latitude, longitude } = route.params.pickedLocation;
+
+      const staticMapUri = getStaticMapPreview({
+        lat: latitude,
+        lng: longitude,
+        label: "",
+      });
+      setUserLocationMapUri(staticMapUri);
+    }
+  }, [route]);
 
   return (
     <View>

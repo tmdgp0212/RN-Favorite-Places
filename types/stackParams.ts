@@ -1,5 +1,11 @@
+import { LatLng } from "react-native-maps";
+
 export type RootStackParams = {
   AllPlaces: undefined;
-  AddPlace: undefined;
-  Map: undefined;
+  AddPlace: {
+    pickedLocation?: LatLng;
+  };
+  Map: {
+    coordinate?: LatLng;
+  };
 };
