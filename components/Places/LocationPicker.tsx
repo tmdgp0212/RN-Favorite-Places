@@ -10,13 +10,18 @@ import { getStaticMapPreview } from "../../utils/location";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParams } from "../../types/stackParams";
+import { LatLng } from "react-native-maps";
 
-const LocationPicker = () => {
+interface Props {
+  location: LatLng | undefined;
+  setLocation: (coordinate: LatLng) => void;
+}
+
+const LocationPicker = ({ location, setLocation }: Props) => {
   const route = useRoute<RouteProp<RootStackParams, "AddPlace">>();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParams>>();
 
-  const [userLocationMapUri, setUserLocationMapUri] = useState<string>();
   const [locationPermissionInfo, requestPermission] =
     useForegroundPermissions();
 
@@ -53,12 +58,10 @@ const LocationPicker = () => {
 
     if (!location) return;
 
-    const staticMapUri = getStaticMapPreview({
-      lat: location.coords.latitude,
-      lng: location.coords.longitude,
-      label: "",
+    setLocation({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
     });
-    setUserLocationMapUri(staticMapUri);
   };
 
   const pickOnMapHandler = async () => {
@@ -77,13 +80,7 @@ const LocationPicker = () => {
   useLayoutEffect(() => {
     if (route.params?.pickedLocation) {
       const { latitude, longitude } = route.params.pickedLocation;
-
-      const staticMapUri = getStaticMapPreview({
-        lat: latitude,
-        lng: longitude,
-        label: "",
-      });
-      setUserLocationMapUri(staticMapUri);
+      setLocation({ latitude, longitude });
     }
   }, [route]);
 
@@ -91,8 +88,17 @@ const LocationPicker = () => {
     <View>
       <Text style={styles.subtitle}>위치선택</Text>
       <View style={styles.mapPreview}>
-        {userLocationMapUri ? (
-          <Image style={styles.image} source={{ uri: userLocationMapUri }} />
+        {location ? (
+          <Image
+            style={styles.image}
+            source={{
+              uri: getStaticMapPreview({
+                lat: location.latitude,
+                lng: location.longitude,
+                label: "",
+              }),
+            }}
+          />
         ) : (
           <Text style={styles.subtitle}>No Picked Location.</Text>
         )}

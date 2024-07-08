@@ -4,13 +4,16 @@ import {
   launchCameraAsync,
   useCameraPermissions,
   PermissionStatus,
-  ImagePickerResult,
 } from "expo-image-picker";
 import { Colors } from "../../constants/colors";
 
-const ImagePicker = () => {
+interface Props {
+  imageUrl: string | undefined;
+  setImageUrl: (imageUrl: string) => void;
+}
+
+const ImagePicker = ({ imageUrl, setImageUrl }: Props) => {
   const [cameraPermissionInfo, requestPermission] = useCameraPermissions();
-  const [imageUri, setImageUri] = useState<string>();
 
   // 카메라 권한 요청 (IOS 호환 시 필요 / android는 자동으로 이루어짐)
   const verifyPermissions = async () => {
@@ -43,15 +46,15 @@ const ImagePicker = () => {
       quality: 0.5, // 0 ~ 1
     });
 
-    !image.canceled && setImageUri(image.assets[0].uri || undefined);
+    !image.canceled && setImageUrl(image.assets[0].uri);
   };
 
   return (
     <View>
       <Text style={styles.subtitle}>사진선택</Text>
       <View style={styles.imagePreview}>
-        {imageUri ? (
-          <Image source={{ uri: imageUri }} style={styles.image} />
+        {imageUrl ? (
+          <Image source={{ uri: imageUrl }} style={styles.image} />
         ) : (
           <Text style={styles.subtitle}>No Image.</Text>
         )}

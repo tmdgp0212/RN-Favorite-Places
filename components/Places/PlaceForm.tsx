@@ -1,14 +1,43 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Button,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { Colors } from "../../constants/colors";
 import ImagePicker from "./ImagePicker";
 import LocationPicker from "./LocationPicker";
+import { LatLng } from "react-native-maps";
 
 const PlaceForm = () => {
   const [enteredTitle, setEnteredTitle] = useState("");
+  const [selectedImageUri, setSelectedImageUri] = useState<string>();
+  const [pickedLocation, setPickedLocation] = useState<LatLng>();
 
   const changeTitleHandler = (value: string) => {
     setEnteredTitle(value);
+  };
+
+  const takeImageHandler = (imageUrl: string) => {
+    setSelectedImageUri(imageUrl);
+  };
+
+  const pickLocationHandler = (coordinate: LatLng) => {
+    setPickedLocation(coordinate);
+  };
+
+  const onSubmit = () => {
+    console.log("enteredTitle : " + enteredTitle);
+    console.log("selectedImageUri : " + selectedImageUri);
+    console.log(
+      "pickedLocation : " +
+        pickedLocation?.latitude +
+        ", " +
+        pickedLocation?.longitude
+    );
   };
 
   return (
@@ -20,8 +49,17 @@ const PlaceForm = () => {
           onChangeText={changeTitleHandler}
           value={enteredTitle}
         />
-        <ImagePicker />
-        <LocationPicker />
+        <ImagePicker
+          imageUrl={selectedImageUri}
+          setImageUrl={takeImageHandler}
+        />
+        <LocationPicker
+          location={pickedLocation}
+          setLocation={pickLocationHandler}
+        />
+        <View style={styles.submitButtonContainer}>
+          <Button title="제출" onPress={onSubmit} />
+        </View>
       </View>
     </ScrollView>
   );
@@ -47,5 +85,9 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.primary700,
     borderBottomWidth: 2,
     backgroundColor: Colors.primary100,
+  },
+  submitButtonContainer: {
+    marginTop: 24,
+    marginBottom: 16,
   },
 });
