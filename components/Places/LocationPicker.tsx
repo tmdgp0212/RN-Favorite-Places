@@ -1,20 +1,22 @@
-import React, { useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect } from "react";
 import { Alert, Button, Image, StyleSheet, Text, View } from "react-native";
 import {
   PermissionStatus,
   getCurrentPositionAsync,
   useForegroundPermissions,
 } from "expo-location";
-import { Colors } from "../../constants/colors";
-import { getStaticMapPreview } from "../../utils/location";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
+import { Colors } from "../../constants/colors";
+import { getAddress, getStaticMapPreview } from "../../utils/location";
+
 import { RootStackParams } from "../../types/stackParams";
-import { LatLng } from "react-native-maps";
+import { Location } from "../../types/place";
 
 interface Props {
-  location: LatLng | undefined;
-  setLocation: (coordinate: LatLng) => void;
+  location: Location | undefined;
+  setLocation: (location: Location) => void;
 }
 
 const LocationPicker = ({ location, setLocation }: Props) => {
@@ -58,10 +60,13 @@ const LocationPicker = ({ location, setLocation }: Props) => {
 
     if (!location) return;
 
-    setLocation({
+    const coordinate = {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
-    });
+    };
+
+    const address = await getAddress(coordinate);
+    setLocation({ ...coordinate, address });
   };
 
   const pickOnMapHandler = async () => {
@@ -78,9 +83,13 @@ const LocationPicker = ({ location, setLocation }: Props) => {
   };
 
   useLayoutEffect(() => {
-    if (route.params?.pickedLocation) {
-      const { latitude, longitude } = route.params.pickedLocation;
-      setLocation({ latitude, longitude });
+    async function handlerLocation() {
+      if (route.params?.pickedLocation) {
+        const coordinate = route.params.pickedLocation;
+
+        const address = await getAddress(coordinate);
+        setLocation({ ...coordinate, address });
+      }
     }
   }, [route]);
 
@@ -92,11 +101,7 @@ const LocationPicker = ({ location, setLocation }: Props) => {
           <Image
             style={styles.image}
             source={{
-              uri: getStaticMapPreview({
-                lat: location.latitude,
-                lng: location.longitude,
-                label: "",
-              }),
+              uri: getStaticMapPreview(location),
             }}
           />
         ) : (

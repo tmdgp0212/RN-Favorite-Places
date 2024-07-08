@@ -10,12 +10,12 @@ import {
 import { Colors } from "../../constants/colors";
 import ImagePicker from "./ImagePicker";
 import LocationPicker from "./LocationPicker";
-import { LatLng } from "react-native-maps";
+import { Location } from "../../types/place";
 
 const PlaceForm = () => {
   const [enteredTitle, setEnteredTitle] = useState("");
   const [selectedImageUri, setSelectedImageUri] = useState<string>();
-  const [pickedLocation, setPickedLocation] = useState<LatLng>();
+  const [pickedLocation, setPickedLocation] = useState<Location>();
 
   const changeTitleHandler = (value: string) => {
     setEnteredTitle(value);
@@ -25,8 +25,8 @@ const PlaceForm = () => {
     setSelectedImageUri(imageUrl);
   };
 
-  const pickLocationHandler = (coordinate: LatLng) => {
-    setPickedLocation(coordinate);
+  const pickLocationHandler = (location: Location) => {
+    setPickedLocation(location);
   };
 
   const onSubmit = () => {
@@ -36,7 +36,9 @@ const PlaceForm = () => {
       "pickedLocation : " +
         pickedLocation?.latitude +
         ", " +
-        pickedLocation?.longitude
+        pickedLocation?.longitude +
+        ", " +
+        pickedLocation?.address
     );
   };
 
